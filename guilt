@@ -428,7 +428,19 @@ series_insert_patch()
 			print $0;
 			if (top != "" && top == $0) print new;
 		}' "$series" > "$series.tmp"
-	mv "$series.tmp" "$series"
+  mv "$series.tmp" "$series"
+}
+
+# usage: line=get_series_top_line
+# return top patch line number in series
+get_series_top_line()
+{
+	awk -v top="`get_top`" -v new="$1" \
+	    'BEGIN{if (top == "") ; iter=0;}
+	    	      {
+				iter=iter+1;
+						if (top != "" && top == $0)  {print iter; exit};
+						   }' "$series"
 }
 
 # usage: series_remove_patch <patchname>
