@@ -11,11 +11,14 @@ include::usage-guilt-import.txt[]
 
 DESCRIPTION
 -----------
-Import a specified patch file into the series, placing it after the
+Import a specified patch file or mailbox into the series, placing it after the
 current topmost patch.
 
 OPTIONS
 -------
+-m <mailbox>::
+	Name of the mbox within Guilt.
+
 -P <patch>::
 	Name of the patch within Guilt.
 

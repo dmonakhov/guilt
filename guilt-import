@@ -12,6 +12,11 @@ fi
 _main() {
 
 case "$1" in
+	-m)
+		mbox=$2
+		newname=`basename "$2"`
+		oldname="$2"
+		;;
 	-P)
 		newname="$2"
 		oldname="$3"
@@ -21,6 +26,17 @@ case "$1" in
 		oldname="$1"
 		;;
 esac
+
+# import patches from mail box file 
+import_mbox()
+{
+	top_head=`cat $GIT_DIR/refs/heads/$branch`
+	git am "$1"
+	status=$?
+	[ $status -eq 0 ] || exit $status
+	cur_head=`cat $GIT_DIR/refs/heads/$branch`
+	guilt import-commit $top_head..$cur_head
+}
 
 if [ $# -lt 1 ] || [ $# -gt 3 ] || [ -z "$newname" ] || [ -z "$oldname" ]; then
 	usage
@@ -33,6 +49,17 @@ fi
 
 if [ ! -e "$oldname" ]; then
 	die "Specified file does not exist."
+fi
+
+# import mailbox 
+if [ ! -z "$mbox" ]; then
+	top_head=`cat $GIT_DIR/refs/heads/$branch`
+	import_mbox "$mbox"
+	status=$?
+	if [ $status -ne 0 ]; then
+		git reset --hard $top_head > /dev/null
+	fi	
+	exit $status
 fi
 
 if [ -e "$GUILT_DIR/$branch/$newname" ]; then
