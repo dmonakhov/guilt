@@ -3,7 +3,7 @@
 # Copyright (c) Pierre Habouzit, 2007
 #
 
-USAGE="[<target_dir>]"
+USAGE="[-c] [<target_dir>]"
 if [ -z "$GUILT_VERSION" ]; then
 	echo "Invoking `basename "$0"` directly is no longer supported." >&2
 	exit 1
@@ -11,10 +11,29 @@ fi
 
 _main() {
 
-if [ $# -gt 1 ]; then
+case $# in
+    0)
 	usage
-fi
-target_dir=${1:-"patches"}
+	;;
+    1)
+	if [ "$1" = "-c" ]; then
+	    usage
+	else
+	    target_dir=${1:-"patches"}
+	fi
+	;;
+    2)
+	[ "$1" != "-c" ] && usage
+	target_dir=${2:-"patches"}
+	if [ -e "$target_dir" ]; then
+	    rm $target_dir/*
+	fi
+	bottom=refs/patches/$branch/`head -1 $applied`
+	git format-patch -s ${bottom}^..HEAD -o $target_dir > /dev/null
+	git diff > $target_dir/9999-uncommitted.patch
+	return $?
+	;;
+esac
 
 if [ -e "$target_dir" ]; then
 	die "Specified directory already exists"
