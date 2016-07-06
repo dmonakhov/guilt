@@ -26,8 +26,11 @@ do
 	shift
 done
 
-if [ ! -z "$edit" ]; then 
-	git_editor "$series"
+if [ ! -z "$edit" ]; then
+        top_line=`get_series_top_line`
+#        open_editor_at_line $editor "$series" $top_line
+	git_editor +$top_line "$series" 
+	exit
 elif [ ! -z "$gui" ]; then
 	[ -z "`get_top`" ] && die "No patches applied."
 	bottom=`git rev-parse refs/patches/$branch/$(head_n 1 "$applied")`
